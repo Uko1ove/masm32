@@ -4,7 +4,7 @@
 includelib \masm32\lib\kernel32.lib
 extern ExitProcess@4:near
 ;---------------------
-Subproc PROTO :DWORD,:DWORD
+
 
 
 _DATA SEGMENT
@@ -26,7 +26,10 @@ START:
     push dwNum_1
     call AddProc
     mov dwResult,eax    ;---or mov dword ptr[dwResult],eax----
-    invoke SubProc,dwNum_1,dwNum_2
+
+    mov eax,256
+    mov ebx,-127        ;--mov args to function
+    call SubProc
 
     push [ExitCode]
     call ExitProcess@4 
@@ -59,21 +62,16 @@ AddProc proc
     ret 8
 AddProc endp
 ;--------------------------
-SubProc proc uses ebx edi esi num1:DWORD,num2:DWORD
-    LOCAL a:DWORD
-                        ;--объявление локальных переменных для макро
-    LOCAL b:DWORD
 
-    mov a,0
-                        ;--обнуление локальных переменных для макро
-    mov b,0
-    ;-----------------------
-    mov eax,num1
-    mov ebx,num2
-    sub eax,ebx
+SubProc proc
+    sub eax,ebx                  ;--function operation with arguments
+    neg eax
+    not eax
+    inc eax
+    dec eax
+
     ret
-
-Subproc endp
+SubProc endp
 
 _TEXT ENDS
 END START
