@@ -30,7 +30,8 @@ START:
     mov ebx,256
     mov edx,-127        ;--mov args to function
     push _next
-    jmp SubProc         ;--call fuction with jmp command
+    push offset SubProc     ;--push function address on the top of stack
+    ret                     ;--jump to the adderss of function
     
 _next:                  ;--create mark for next row
     push [ExitCode]
