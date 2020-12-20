@@ -27,9 +27,10 @@ START:
     call AddProc
     mov dwResult,eax    ;---or mov dword ptr[dwResult],eax----
 
-    mov eax,256
-    mov ebx,-127        ;--mov args to function
-    call SubProc
+    mov ebx,256
+    mov edx,-127        ;--mov args to function
+    mov eax, offset SubProc
+    call eax
 
     push [ExitCode]
     call ExitProcess@4 
@@ -64,12 +65,12 @@ AddProc endp
 ;--------------------------
 
 SubProc proc
-    sub eax,ebx                  ;--function operation with arguments
-    neg eax
-    not eax
-    inc eax
-    dec eax
-
+    sub ebx,edx                  ;--function operation with arguments
+    neg ebx
+    not ebx
+    inc ebx
+    dec ebx
+    mov eax,ebx
     ret
 SubProc endp
 
