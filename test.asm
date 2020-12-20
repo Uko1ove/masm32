@@ -29,9 +29,10 @@ START:
 
     mov ebx,256
     mov edx,-127        ;--mov args to function
-    mov eax, offset SubProc
-    call eax
-
+    push _next
+    jmp SubProc         ;--call fuction with jmp command
+    
+_next:                  ;--create mark for next row
     push [ExitCode]
     call ExitProcess@4 
 ;--------------------------
