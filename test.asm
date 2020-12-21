@@ -48,7 +48,7 @@ MulProc proc
     pop esi
     pop ebx
     leave
-    ret 4                       ;-- we had only 1 argyment. = 4 byte
+    ret 8                       ;-- we had only 1 argyment. = 4 byte
     
 MulProc endp
 ;-------------------------
