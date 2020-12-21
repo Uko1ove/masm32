@@ -39,9 +39,8 @@ MulProc proc
     movzx ebx,byte ptr[ebp+8]
     mul bx                      ;--mult in bx - old byte. Result is in dx:ax
 ;-----------------------
-    mov word ptr[ebp-4],ax      ;-- move to var's junior word from ax
-    mov word ptr[ebp-2],dx      ;-- move to var's senior word from bx
-    mov eax,dword ptr[ebp-4]    ; <-- but this for training, it's much easier
+    shl edx,16                  ;-- practical way to gather parts in var
+    or eax,edx                  ; shl = shift left - moved 2 bytes result and +
 ;-----------------------
     pop edi
     pop esi
