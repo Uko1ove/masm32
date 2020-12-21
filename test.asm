@@ -9,23 +9,26 @@ extern ExitProcess@4:near
 
 _DATA SEGMENT
     ExitCode    dd 0
-    a           dd 100000
-    b           dd 500000
-    Res         dq 0
+    dwA         dd 40
+    
 _DATA ENDS
 
 
 _TEXT SEGMENT
 
 START:
-    
-    push b
-    
-    push a
-    call MulProc
-    mov dword ptr Res,eax
-    mov dword ptr Res+4,edx
-    
+    mov eax,5                   ;--1st way
+    mov ebx,-7
+    imul ebx
+
+    mov ebx,3                   ;--2nd way
+    imul ebx,6
+
+    mov ebx,500000              ;--3rd way
+    imul eax,ebx,100000
+
+    mov eax,55                  ;--4th way
+    imul eax,dwA
 
     push [ExitCode]
     call ExitProcess@4 
