@@ -45,8 +45,9 @@ MulProc proc
     pop edi
     pop esi
     pop ebx
+    ret 8
     
 MulProc endp
-
+;-------------------------
 _TEXT ENDS
 END START
