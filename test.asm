@@ -9,7 +9,7 @@ extern ExitProcess@4:near
 
 _DATA SEGMENT
     ExitCode    dd 0
-    a           db 60
+    a           db 127
     b           db 9
     
 _DATA ENDS
@@ -18,11 +18,7 @@ _DATA ENDS
 _TEXT SEGMENT
 
 START:
-    mov eax,0
-    mov ebx,0
-    mov al,a
-    mov bl,b
-    push ebx
+    movzx eax,a
     push eax
     call MulProc
 
@@ -35,17 +31,23 @@ MulProc proc
     push ebx
     push esi
     push edi
+    sub esp,4                   ;-- local var for result
 ;-----------------------
-    mov eax,0                   ;-- mutl and '/' use only eax
-    mov al,byte ptr[ebp+8]      ;-- move to junior byte eax
-    mov bl,byte ptr[ebp+12]     ;-- move to junior byte ebx
-    mul bl                      ;-- multiply al*bl
-
+    mov edx,0                   ;--clean edx, 'cause we'll have num > 2 byte
+    movzx eax,byte ptr[ebp+8]
+    mul al
+    movzx ebx,byte ptr[ebp+8]
+    mul bx                      ;--mult in bx - old byte. Result is in dx:ax
+;-----------------------
+    mov word ptr[ebp-4],ax      ;-- move to var's junior word from ax
+    mov word ptr[ebp-2],dx      ;-- move to var's senior word from bx
+    mov eax,dword ptr[ebp-4]    ; <-- but this for training, it's much easier
 ;-----------------------
     pop edi
     pop esi
     pop ebx
-    ret 8
+    leave
+    ret 4                       ;-- we had only 1 argyment. = 4 byte
     
 MulProc endp
 ;-------------------------
