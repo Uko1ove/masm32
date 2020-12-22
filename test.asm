@@ -23,25 +23,15 @@ START:
     mov [esp],eax              ; <- it's one more way to give parametr to function
     call small
 
-    mov ax,127
-    mov bl,5
-    div bl
-    movzx eax,al        ; <- ah - the rest, al - the answer
+    mov eax,100000
+    mov ebx,9900
+    cdq
+    idiv ebx
 
-    mov ax,127
-    mov bl,-5
-    idiv bl
-    movsx eax,al
-
-    mov ax,-127
-    mov bl,5
-    idiv bl
-    movsx eax,al
-
-    mov ax,-127
-    mov bl,-5
-    idiv bl
-    movsx eax,al
+    mov eax,-200000
+    mov ebx,99000
+    cdq
+    idiv ebx
 
     push [ExitCode]
     call ExitProcess@4
