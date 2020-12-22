@@ -26,17 +26,22 @@ START:
     push [ExitCode]
     call ExitProcess@4
 ;--------------------------
-small proc
+small proc                      ;-- example a^2+b^2
     enter 0,0                   ;-- = push ebp  mov ebp,esp
     push ebx
     push esi
     push edi
 ;-----------------------
-    mov eax, dword ptr[ebp+8]
-    add eax, dword ptr[ebp+12]
-    mov ebx,2
-    mul ebx
-    
+    mov eax,[ebp+8]
+    imul eax                    ;-- a*a
+    push eax                    ;-- hide result in stack
+
+    mov eax,[ebp+12]
+    imul eax                    ;-- b*b
+
+    pop ebx                     ;-- take from stack first result
+    add eax,ebx                 ;-- a^2 + b^2
+        
 ;-----------------------
     pop edi
     pop esi
