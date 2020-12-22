@@ -17,34 +17,25 @@ _DATA ENDS
 _TEXT SEGMENT
 
 START:
-    mov eax,5                   ;--1st way
-    mov ebx,-7
-    imul ebx
-
-    mov ebx,3                   ;--2nd way
-    imul ebx,6
-
-    mov ebx,500000              ;--3rd way
-    imul eax,ebx,100000
-
-    mov eax,55                  ;--4th way
-    imul eax,dwA
+    mov ebx,5
+    mov eax,3
+    mov [esp+4],ebx            ; <- give parametr to address esp+4
+    mov [esp],eax              ; <- it's one more way to give parametr to function
+    call small
 
     push [ExitCode]
-    call ExitProcess@4 
+    call ExitProcess@4
 ;--------------------------
-MulProc proc
+small proc
     enter 0,0                   ;-- = push ebp  mov ebp,esp
     push ebx
     push esi
     push edi
-    sub esp,4                   ;-- local var for result
 ;-----------------------
-    mov edx,0
-    mov eax,dword ptr[ebp+8]
-    mov ebx,dword ptr[ebp+12]
+    mov eax, dword ptr[ebp+8]
+    add eax, dword ptr[ebp+12]
+    mov ebx,2
     mul ebx
-;-----------------------
     
 ;-----------------------
     pop edi
@@ -52,7 +43,7 @@ MulProc proc
     pop ebx
     leave
     ret 8                           
-MulProc endp
+small endp
 ;-------------------------
 _TEXT ENDS
 END START
