@@ -9,7 +9,9 @@ extern ExitProcess@4:near
 
 _DATA SEGMENT
     ExitCode    dd 0
-    dwA         dd 40
+    dwA         dd -2
+    dwB         dd 4
+    dwX         dd 11
     
 _DATA ENDS
 
@@ -17,22 +19,11 @@ _DATA ENDS
 _TEXT SEGMENT
 
 START:
-    mov ebx,5
-    mov eax,3
-    mov [esp+4],ebx            ; <- give parametr to address esp+4
-    mov [esp],eax              ; <- it's one more way to give parametr to function
+    push dwX
+    push dwB
+    push dwA
     call small
-
-    mov eax,100000
-    mov ebx,9900
-    cdq
-    idiv ebx
-
-    mov eax,-200000
-    mov ebx,99000
-    cdq
-    idiv ebx
-
+    
     push [ExitCode]
     call ExitProcess@4
 ;--------------------------
@@ -41,23 +32,39 @@ small proc
     push ebx
     push esi
     push edi
+    sub esp,8
 ;-----------------------
-    mov eax,[ebp+8]
-    imul eax                    ;-- a*a
-    push eax                    ;-- hide result in stack
+    mov edx,0
+    mov ebx,dword ptr[ebp+16]
+    mov eax,dword ptr[ebp+12]
+    mul ebx                            ; <-- b*x
+    push eax
+    
+    mov eax,ebx
+    mul eax
+    mov ebx,dword ptr[ebp+8]
+    imul ebx
 
-    mov eax,[ebp+12]
-    imul eax                    ;-- b*b
+    pop ebx
+    sub eax,ebx
+    add eax,10
+    mov dword ptr[ebp-20],eax
 
-    pop ebx                     ;-- take from stack first result
-    add eax,ebx                 ;-- a^2 + b^2
-        
+    mov eax,dword ptr[ebp+16]
+    mov ebx,dword ptr[ebp+8]
+    sub eax,ebx
+    mov dword ptr[ebp-16],eax
+
+    pop eax
+    pop ebx
+    cdq
+    idiv ebx
 ;-----------------------
     pop edi
     pop esi
     pop ebx
     leave
-    ret 8                           
+    ret 12                           
 small endp
 ;-------------------------
 _TEXT ENDS
