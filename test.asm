@@ -9,19 +9,21 @@ extern ExitProcess@4:near
 
 _DATA SEGMENT
     ExitCode    dd 0
-    dwA         dd -2
-    dwB         dd 4
-    dwX         dd 11
-    
+        
 _DATA ENDS
 
 
 _TEXT SEGMENT
 
 START:
-    push dwX
-    push dwB
-    push dwA
+    mov ecx,11                      ;-- x = 11
+    mov ebx,4                       ;-- b = 4
+    mov eax,-2                      ;-- a = -2
+
+    mov [esp+8],ecx
+    mov [esp+4],ebx
+    mov [esp],eax
+    
     call small
     
     push [ExitCode]
@@ -32,33 +34,24 @@ small proc
     push ebx
     push esi
     push edi
-    sub esp,8
 ;-----------------------
-    mov edx,0
-    mov ebx,dword ptr[ebp+16]
-    mov eax,dword ptr[ebp+12]
-    mul ebx                            ; <-- b*x
+    mov ecx,dword ptr[ebp+16]       ;x
+    mov eax,dword ptr[ebp+12]       ;b
+    imul ecx
     push eax
-    
-    mov eax,ebx
-    mul eax
-    mov ebx,dword ptr[ebp+8]
-    imul ebx
+
+    mov eax,dword ptr[ebp+8]
+    imul ecx
+    imul ecx
 
     pop ebx
     sub eax,ebx
-    add eax,10
-    mov dword ptr[ebp-20],eax
-
-    mov eax,dword ptr[ebp+16]
+    add eax,10                  ;result1
+;------------------------
     mov ebx,dword ptr[ebp+8]
-    sub eax,ebx
-    mov dword ptr[ebp-16],eax
-
-    pop eax
-    pop ebx
+    sub ecx,ebx                 ;result2
     cdq
-    idiv ebx
+    idiv ecx
 ;-----------------------
     pop edi
     pop esi
