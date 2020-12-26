@@ -25,6 +25,26 @@ START:
     mov [esp],eax
     
     call small
+
+;--SIZE--EXTENSION--OF--DATA
+
+    mov eax,-1
+    mov al,5                        ; <-- imitation of movzx, if positive
+    mov ah,0
+
+    mov al,-5                       ; <-- imitation if negative
+    mov ah,0ffh
+
+    mov eax,0                       ; <-- convert byte word
+    mov al,-5
+    cbw
+
+    mov eax,0
+    mov edx,0
+    mov ax,-3654
+    cwd
+
+    
     
     push [ExitCode]
     call ExitProcess@4
