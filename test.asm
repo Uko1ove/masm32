@@ -5,73 +5,59 @@ includelib \masm32\lib\kernel32.lib
 extern ExitProcess@4:near
 ;---------------------
 
-
+;--- (2ac-b/x-12)/(cx+a)----
 
 _DATA SEGMENT
     ExitCode    dd 0
-;--x=(a+b)/c--
-    bA          db -55
-    wB          dw -3145
-    wC          dw 100
-    dwX         dd 40
+    bA          db 3
+    bB          db 16
+    bC          db -5
+    X           db 4
+    r1          dd ?
+    r2          dd ?
+    
 _DATA ENDS
 
 
 _TEXT SEGMENT
 
 START:
-    mov ecx,11                      ;-- x = 11
-    mov ebx,4                       ;-- b = 4
-    mov eax,-2                      ;-- a = -2
-
-    mov [esp+8],ecx
-    mov [esp+4],ebx
-    mov [esp],eax
-    
-    call small
-;------------------------
-    movsx ax,byte ptr[bA]
-    add ax,word ptr[wB]
-    cwd
-    idiv wC
-
-    mov word ptr[dwX],ax
-    mov word ptr[dwX+2],dx
-        
-    
-    push [ExitCode]
-    call ExitProcess@4
-;--------------------------
-small proc                      
-    enter 0,0                   
-    push ebx
-    push esi
-    push edi
-;-----------------------
-    mov ecx,dword ptr[ebp+16]       ;x
-    mov eax,dword ptr[ebp+12]       ;b
-    imul ecx
+    mov eax,0
+    mov ebx,0
+    mov edx,0
+    mov al,[bA]
+    mov bl,[bC]
+    imul bl
+    movsx eax,ax
+    imul eax,2
     push eax
 
-    mov eax,dword ptr[ebp+8]
-    imul ecx
-    imul ecx
-
-    pop ebx
+    mov eax,0
+    mov al,[bB]
+    mov bl,[X]
+    div bl
+    movzx ebx,al
+    pop eax
     sub eax,ebx
-    add eax,10                  ;result1
-;------------------------
-    mov ebx,dword ptr[ebp+8]
-    sub ecx,ebx                 ;result2
+    sub eax,12
+    mov dword ptr[r1],eax
+
+    mov eax,0
+    mov al,[bC]
+    mov bl,[X]
+    imul bl
+    movsx eax,ax
+    mov bl,[bA]
+    add eax,ebx
+    mov dword ptr[r2],eax
+
+    mov eax,[r1]
+    mov ebx,[r2]
     cdq
-    idiv ecx
-;-----------------------
-    pop edi
-    pop esi
-    pop ebx
-    leave
-    ret 12                           
-small endp
+    idiv ebx
+
+    push [ExitCode]
+    call ExitProcess@4
 ;-------------------------
 _TEXT ENDS
 END START
