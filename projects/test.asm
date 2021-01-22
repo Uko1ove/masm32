@@ -34,28 +34,31 @@ small proc
     push esi
     push edi
 ;-----------------------
-    mov eax,dword ptr[ebp+12]           ;b
-    cdq
-    idiv dword ptr[ebp+20]              ;b/x
-    mov ebx,eax
-
     mov eax,dword ptr[ebp+8]
-    imul dword ptr[ebp+16]              ;a*c
-    mov ecx,2
-    imul ecx                            ;2*ac
+    add eax,eax                             ;2a
+    imul dword ptr [ebp+16]                 ;2ac
 
-    sub eax,ebx
-    sub eax,12
-    push eax
-;-----------------------
-    mov eax,dword ptr[ebp+16]           ;c
-    imul dword ptr[ebp+20]              ;c*x
-    add eax,dword ptr[ebp+8]            ;cx+a
+    mov ecx,eax
 
+    mov eax,dword ptr[ebp+12]
+    cdq
+    idiv dword ptr[ebp+20]                  ;b/x
+
+    sub ecx,eax
+    sub ecx,12
+
+    mov eax,dword ptr[ebp+16]
+    imul dword ptr[ebp+20]                  ;cx
     mov ebx,eax
-    pop eax
+    mov eax,dword ptr[ebp+8]
+    add ebx,eax                             ;cx+a
+;-----------------------
+    mov eax,ecx
     cdq
     idiv ebx
+    
+    
+    
     
 ;-----------------------
     pop edi
