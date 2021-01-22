@@ -3,9 +3,19 @@
 ;---------------------
 includelib \masm32\lib\kernel32.lib
 extern ExitProcess@4:near
+extern GetStdHandle@4:near                     ;-function
+extern CloseHandle@4:near
+extern lstrlenA@4:near
+extern WriteConsoleA@20:near
+extern ReadConsoleA@20:near
 ;---------------------
 _DATA SEGMENT
     ExitCode    dd 0
+    hIn         dd 0                        ;var for input
+    hOut        dd 0                        ;var for output
+    szExit      db "Press any key...",0     ;--string
+    dwCnt       dd 0                        ;var for cout of symbols
+    szBuffer    db 255 dup(0)               
         
 _DATA ENDS
 
@@ -13,16 +23,42 @@ _DATA ENDS
 _TEXT SEGMENT
 
 START:
-;----(2ac-b/x-12)/(cx+a)---a=3,b=16,c=-5,x=4
-    push 4
-    push -5
-    push 16
-    push 3
+
+    push -10                    ;--input stream
+    call GetStdHandle@4
+    mov hIn,eax                 ;--move handle from eax to var
+
+    push -11                    ;--output stream
+    call GetStdHandle@4
+    mov hOut,eax
     
-    
+    push offset szExit          ;--important! offset! address of var
+    call lstrlenA@4
+;-------------------------
+    push 0                      ;--push args from end to beginning <--NULL
+    push offset dwCnt           ;--variable to put count of symbols
+    push eax                    ;--strlen--is written to eax-look before call
+    push offset szExit          ;--string
+    push [hOut]                 ;--handle--(in this case output)
+    call WriteConsoleA@20
+;-------------------------
+    push 0                      ;--NULL
+    push offset dwCnt           ;--var (addres where we put the count of symbols)
+    push 255                    ;--buffer size
+    push offset szBuffer        ;--var where buffer is written
+    push[hIn]                   ;--handle (in this case input)
+    call ReadConsoleA@20
+
+
+
+
     call small
+    
+    push hIn
+    call CloseHandle@4          ;--close and clean
 
-
+    push hOut
+    call CloseHandle@4
     
     
     push [ExitCode]
