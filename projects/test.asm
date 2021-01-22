@@ -32,20 +32,24 @@ START:
     call GetStdHandle@4
     mov hOut,eax
     
-    push offset szExit          ;--important! offset! address of var
+    lea eax,szExit              ;--new command lea. Puts address in register
+    push eax
     call lstrlenA@4
 ;-------------------------
     push 0                      ;--push args from end to beginning <--NULL
-    push offset dwCnt           ;--variable to put count of symbols
+    lea ebx,dwCnt 
+    push ebx                    ;--variable to put count of symbols
     push eax                    ;--strlen--is written to eax-look before call
     push offset szExit          ;--string
     push [hOut]                 ;--handle--(in this case output)
     call WriteConsoleA@20
 ;-------------------------
     push 0                      ;--NULL
-    push offset dwCnt           ;--var (addres where we put the count of symbols)
+    lea ebx,dwCnt
+    push ebx                    ;--var (addres where we put the count of symbols)
     push 255                    ;--buffer size
-    push offset szBuffer        ;--var where buffer is written
+    lea eax,szBuffer
+    push eax                    ;--var where buffer is written
     push[hIn]                   ;--handle (in this case input)
     call ReadConsoleA@20
 
