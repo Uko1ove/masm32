@@ -11,6 +11,8 @@ extern ReadConsoleA@20:near
 extern wsprintfA:near                   
 ;---------------------
 MAX_SIZE        equ     255
+STD_INP_HANDLE  equ     -10
+STD_OUT_HANDLE  equ     -11
 
 
 
@@ -34,8 +36,7 @@ START:
     call ExitProcess@4
 ;**************************************
 main proc                                   ;--function main
-
-    _do:
+    
         push offset szIntro
         call cout
         ;-------------------
@@ -54,14 +55,17 @@ main proc                                   ;--function main
                 call cout
             .endif
 ;-------------------------------
-            jmp _do
+            jmp _while_
 _do_end:
-
     ret
 main endp
 ;***************************************
 ;ebp+8 - pStr - string pointer 
 
+dwHout  equ [ebp-4]                         ;--we create constant, local var for handle
+dwCnt   equ [ebp-8]                         ;--var for count
+pStr    equ [ebp+8]                         ;--parametr in function
+;---------------------------
 cout proc                                   ;--function of organization of output
     push ebp
     mov ebp,esp
@@ -71,22 +75,21 @@ cout proc                                   ;--function of organization of outpu
     push esi
     push edi
 ;---------------------
-    push -11
+    push STD_OUT_HANDLE
     call GetStdHandle@4
-    mov dword ptr[ebp-4],eax                ;--move handle from eax to local var 
+    mov dword ptr[dwHout],eax               ;--move handle from eax to local var 
     ;-------------
-    mov esi,dword ptr[ebp+8]
+    mov esi,dword ptr[pStr]
     push esi
-    call lens
+    call strLens
     ;-------------
     push 0
-    mov ebx,ebp                             ;cause we can't just push this address
-    sub ebx,8
+    lea ebx,[dwCnt]                         
     ;-------------
     push ebx                                ;--var for number of written symbols
     push eax                                ;--string length saved from lens function
     push esi                                ;--string address
-    push dword ptr[ebp-4]                   ;--handle
+    push dword ptr[dwHout]                  ;--handle
     call WriteConsoleA@20
     
 ;---------------------
@@ -99,6 +102,11 @@ cout proc                                   ;--function of organization of outpu
     ret 4
 cout endp
 ;***************************************
+
+dwNum       equ [ebp-4]                         ;constants for not to forget, what we do
+pBuff       equ [ebp+8]
+
+
 cin proc                                        ;--;function of organization of input
     push ebp
     mov ebp,esp
@@ -110,17 +118,16 @@ cin proc                                        ;--;function of organization of 
     push esi
     push edi
 ;--------------------
-    mov edi,dword ptr[ebp+8]
+    mov edi,dword ptr pBuff
     ;----------------
-    push -10
+    push STD_INP_HANDLE
     call GetStdHandle@4
     ;----------------
-    mov esi,ebp
-    sub esi,4                                   ;--address of local var
+    lea esi,dwNum
     ;----------------
     push 0
     push esi                                    ;--string length
-    push 255
+    push MAX_SIZE
     push edi                                    ;--buffer address
     push eax                                    ;--handle
     call ReadConsoleA@20
@@ -152,8 +159,9 @@ lens proc                                   ;--function returns tring length to 
     sub ecx,ecx
     ;------------
 _while:                                     ;--we can give to it any name
-    mov al,byte ptr[esi]
-    cmp al,0
+
+    cmp byte ptr[esi],0
+    ;-------------
     jz _end_while
     ;-------------
     inc ecx
@@ -172,6 +180,38 @@ _end_while:
     ret 4
 lens endp
 ;*******************************************
+strLens proc
+    push ebp
+    mov ebp,esp
+    push ebx
+    push esi
+    push edi
+    ;------------
+    mov esi,dword ptr[ebp+8]               
+    ;------------
+    xor ecx,ecx                         ; index = 0 in loop
+    ;------------
+    jmp _for                            ;--loop for
+_in:
+
+    inc ecx
+
+_for:
+    cmp byte ptr[esi+ecx],0
+    jnz _in
+    ;------------
+    mov eax,ecx
+    ;------------
+    pop edi
+    pop esi
+    pop ebx
+    mov esp,ebp
+    pop ebp
+
+    ret 4
+
+strLens endp
+;********************************************
 small proc                                      ;--say hello and goodbye
     enter 0,0                   
     push ebx
