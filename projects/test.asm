@@ -45,26 +45,17 @@ main proc                                   ;--function main
             ;---------------
             mov al,byte ptr[szBuffer]
             ;----------------
-            cmp al,'q'                      ;-!INMPORTANT!-only '' quotes, not " ". OR 71h
-            je _do_end
-            ;----------------
-            cmp al,61h                      ;---'a'--
-            je _small
-            ;----------------
-            push offset szError
-            call cout
-            ;----------------
-            jmp _while_
-
-            _small:
+            .if al=='q'
+                jmp _do_end
+            .elseif al =='a'
                 call small
-                jmp _while_
-        _while__end:
-
-
-    _do_end:
-
-
+            .else
+                push offset szError
+                call cout
+            .endif
+;-------------------------------
+            jmp _do
+_do_end:
 
     ret
 main endp
