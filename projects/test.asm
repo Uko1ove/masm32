@@ -34,7 +34,9 @@ START:
 ;-------------------------
     push [ExitCode]
     call ExitProcess@4
+    
 ;**************************************
+
 main proc                                   ;--function main
     
         push offset szIntro
@@ -59,7 +61,9 @@ main proc                                   ;--function main
 _do_end:
     ret
 main endp
-;***************************************
+
+;**********************************************
+
 ;ebp+8 - pStr - string pointer 
 
 dwHout  equ [ebp-4]                         ;--we create constant, local var for handle
@@ -81,7 +85,7 @@ cout proc                                   ;--function of organization of outpu
     ;-------------
     mov esi,dword ptr[pStr]
     push esi
-    call strLens
+    call str_len
     ;-------------
     push 0
     lea ebx,[dwCnt]                         
@@ -101,7 +105,8 @@ cout proc                                   ;--function of organization of outpu
     
     ret 4
 cout endp
-;***************************************
+
+;*************************************************
 
 dwNum       equ [ebp-4]                         ;constants for not to forget, what we do
 pBuff       equ [ebp+8]
@@ -146,7 +151,9 @@ cin proc                                        ;--;function of organization of 
     
     ret 4
 cin endp
+
 ;*****************************************
+
 lens proc                                   ;--function returns tring length to eax
     push ebp
     mov ebp,esp
@@ -156,7 +163,7 @@ lens proc                                   ;--function returns tring length to 
 ;----------------
     mov esi,dword ptr[ebp+8]                ;--address of string
     ;------------
-    sub ecx,ecx
+    xor ecx,ecx
     ;------------
 _while:                                     ;--we can give to it any name
 
@@ -179,7 +186,9 @@ _end_while:
 
     ret 4
 lens endp
+
 ;*******************************************
+
 strLens proc
     push ebp
     mov ebp,esp
@@ -200,7 +209,9 @@ _for:
     cmp byte ptr[esi+ecx],0
     jnz _in
     ;------------
-    mov eax,ecx
+    xor ecx,eax                         ;--this 2 strings exchange mov eax,ecx
+    xor eax,ecx
+    ;xor ecx,eax                        if we want to replace data between 2 registers
     ;------------
     pop edi
     pop esi
@@ -211,7 +222,55 @@ _for:
     ret 4
 
 strLens endp
-;********************************************
+
+;*********************************************
+
+str_len proc
+
+    push ebp
+    mov ebp,esp
+    ;------------
+    add esp,-4                          ;--local var for index. But we shouldn't do this
+    push ebx
+    push esi
+    push edi
+    ;------------
+    mov esi,dword ptr[ebp+8]               
+    ;------------
+    mov dword ptr[ebp-4],0
+    ;------------
+    jmp _for_
+
+
+_in_:
+
+    mov eax,dword ptr[ebp-4]            ;--move to eax index, that is in the local var
+    lea edx,[eax+1]                     ;--take address of eax and add 1. This is slower,
+    ;--------------                         only for practice.
+    mov dword ptr[ebp-4],edx            ;--encreased count save in the local var.
+
+_for_:
+
+    mov eax,dword ptr[ebp-4]            ;--3 operations - chek for 0 symbol
+    mov al,byte ptr[esi+eax]
+    or al,al
+    jne _in_
+
+    mov eax,dword ptr[ebp-4]
+    ;------------
+    
+    pop edi
+    pop esi
+    pop ebx
+    mov esp,ebp
+    pop ebp
+
+    ret 4
+
+str_len endp
+
+;**********************************************
+
 small proc                                      ;--say hello and goodbye
     enter 0,0                   
     push ebx
