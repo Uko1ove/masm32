@@ -25,7 +25,33 @@ start:
 ;**************************************
 
 main proc                                   
-    
+    _do:
+        push offset szLine1
+        call StdOut@4
+        ;-------------
+        push offset szBuffer
+        call cin
+        ;-------------
+        cmp byte ptr[szBuffer],0
+        jz _do_end
+        ;-------------
+        push offset szBuffer
+        call lens
+        ;-------------
+        push eax
+        push offset szFormat
+        push offset szBuffer
+        call wsprintfA
+        ;-------------
+        add esp,12
+        ;-------------
+        push offset szBuffer
+        call StdOut@4
+        jmp _do
+
+
+
+    _do_end:
         
     ret
 main endp
@@ -94,7 +120,16 @@ lens proc
     push esi
     push edi
     ;------------
-    
+    xor eax,eax
+    mov edi,dword ptr[ebp+8]                ;string address
+    mov ecx,0ffffffffh                      ;move to ecx maximum to fill it
+    ;------------
+    mov ebx,edi                             ;save beginning address of string
+    repne scasb                             ;repeat while not equal, compare 1 byte symbol with al
+    sub edi,ebx
+    dec edi
+    xor eax,edi
+    xor edi,eax
     ;------------
     pop edi
     pop esi
