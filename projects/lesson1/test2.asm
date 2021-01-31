@@ -36,7 +36,7 @@ main proc
         jz _do_end
         ;-------------
         push offset szBuffer
-        call lens
+        call lens2
         ;-------------
         push eax
         push offset szFormat
@@ -139,6 +139,40 @@ lens proc
 
     ret 4
 lens endp
+
+;*******************************************
+
+lens2 proc                                  ;--the most optimal variant of such a function
+
+    push ebp
+    mov ebp,esp
+    push ebx
+    push esi
+    push edi
+    ;------------
+    xor eax,eax
+    mov edi,dword ptr[ebp+8]                ;string address
+    or ecx,0ffffffffh                       ;move to ecx maximum to fill it
+    ;------------
+    repne scasb                             ;repeat while not equal, compare 1 byte symbol with al
+    not ecx                                 ;inversion
+    dec ecx
+    xor eax,ecx
+    xor ecx,eax
+    ;------------
+    pop edi
+    pop esi
+    pop ebx
+    mov esp,ebp
+    pop ebp
+
+    ret 4
+
+
+
+
+
+lens2 endp
 
 ;*******************************************
 
