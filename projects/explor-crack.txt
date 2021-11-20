@@ -1,0 +1,209 @@
+
+1). Entry Point.
+2). Enter into the window reg-N: 9379992-jykuje - bad. Try 9379992-jykujelp.
+3). and esp, 0fffffff8h(-8) - without changes
+4). push addr in stack(ecx), push 06bh(107), mov to local var addr in eax, previosly was in
+    ecx (esp+18)
+5). call func
+6). func is separates num part and str, writes it in buffer, previosly in ecx. Returns
+    39h(57 - '9' symbol). In edx - addr in stack with the 1st symbol of whole ser-N('9'),
+    in ecx - the last symbol('e')
+7). mov addr of ser-n to local var esp+Ch, push addr in stack - maybe some buffer,0dDh is there.
+    0Dh - is carriage return as well.
+8). push 2Dh ('-' symbol)
+9). mov to edi addr in stack where is written pointer(addr) on ser-N.
+10). call func divide set num. Counts 1st part length, 
+    eax - the adr of buffer
+    ebx - 0
+    ecx - last symbol of ser-N
+    edx - first char
+    esi - ??? some addr
+    edi - addr in stack, where pointer for ser-N is written.
+11). Before ret 8: eax=10h; ecx=3; edx=2; esi - addr where 0, edi - addr where the addr of
+     1st letter of string of ser-N.
+12). 
+
+NB: cmp num, 2C06ABh (2885291)
+    jb xor eax,eax
+    if above -> and eax,7
+    cmp eax,1; if == then ret
+    else cmp eax,2. if == then ret
+    else xor eax,eax; ret
+    eax can have 0,1 or 2 values after this func
+    ??? if and eax,7 == 1 || 2, it will pass
+    4A4D22(1)h - try this num to find out(4934946(5)) ???
+    ---------------------------------------
+13). At this moment 
+    eax - either 0 or 1 or 2
+    ebx - 0; ecx - addr of str
+    edx - 65h('e')??? may have different values, maybe has last letter of str
+    esi - num; edi - 104h
+
+14). 
+
+-------------------------------------------------------------------
+num validation
+
+cmp num, 100 000 000
+mov to stack where addr of str part of serial, eax (0,1 or 2)
+jbe to validation.
+
+15). if > 100 mlns - mov esp+C,eax; lea eax, addr of buffer with ser-N str; lea eax previous
+    addr+2(2nd char of ser-N str); count str length-1, cmp result,8. If ==, cmp 5th char
+    with 65h('e'), if not - to validation. It seems to be important that length should be
+    9 if num > 5F5E100h.
+16). If 5th == 65h, cmp 6th char with 6Eh('n'). Jne validation, if ==, mov eax,num
+    divide it by 64h(100) and jmp to validation.
+-----------------------------------
+Conclusion. The num can be 100 000 001 and more, but it divides by 100d. And the result of
+div - 1 should be > 2C06ABh (2885291) && (and result,7== 1 || 2) || result of dev >= 5 597 501d.
+The range is: 4e4d25h(5 131 557) - 5F5E100h(100 000 000) ||  5F5E101h+.
+
+
+mov eax,esi(num)
+mov ecx,[eax-1]
+cmp ecx,4e4d23h(5131555)
+ja TO GOOD
+cmp eax,55693dh(5597501)            (num-1 > 5131555 || num >=5597501 (choose 9379992)) &&
+                                    num < 5F5E100(100 000 000)
+-----------------------------------------------------
+Before the func of generation:
+or esp+C, ffffffh - (-1) will be anyway in local var
+lea eax, esp+18(0) - buffer
+push eax
+push esi(num)
+lea eax, addr of buffer with str
+mov esp+20,ebx(0)
+mov esp+24,ebx(0)
+------------------
+eax - addr of str; ebx - 0
+ecx - num-1; esi - num; edi - 104h
+esp+Ch  = pointer on buffer
+esp+14h = -1;
+esp+18h = str;
+esp+20h = ebx = 0
+esp+24h = ebx = 0 
+    push pointer on buffer
+    mov edi,eax(str addr)
+    push num
+    push 0
+        sub esp,208h
+        ebp+8  = 0
+        ebp+Ch = num
+        mov eax, num
+        push 0
+        mov ebx,buffer
+        lea esi,addr in stack with 104h(ebp-208h) local var
+        push eax,num / 100
+        ----------------------
+        eax = num \ 100; ebx = buffer; ecx = 64h(100)
+        edx = 5Ch(rest from num\100); esi - addr in stack? local var with 104h
+        edi = str.
+            sub esp,44h
+            mov eax,"abcdef"
+            call f() - moves string "abcdef" to buffer, ret buff addr in eax
+            -------------------
+            mov eax,result/100
+            div 9
+            -------
+            mov ebx, szStr8
+            mov edi, szEtr11
+            mov to local vars ebp-44h - ebp-8 all strings for generation
+            ebp-4 = eax = num/100/9
+            mov eax, dword ptr[ebp+edx*4-44h], this is the addr of start generation str.
+
+            before generation f() call^
+            eax - addr of 1st gen str [ebp+edx*4-44h]; ebx - addr 8th gen str
+            ecx - addr of abcdef, edx - rest of (num/100) / 9
+            esi = ecx, edi - addr of 11th gen str.
+            call generate()
+
+                
+            
+
+
+
+
+
+
+generation func
+
+num / 64h(100)                      937999 / 100 = result0
+result0 / 9                         10422 = result1 the rest in edx
+
+
+00A8BEFC  61 00 62 00 63 00 64 00 65 00 66 00 00 00 00 00  a.b.c.d.e.f.....  
+00A8BF0C  6D 00 6E 00 62 00 76 00 61 00 71 00 00 00 00 00  m.n.b.v.a.q.....  
+00A8BF1C  63 00 78 00 7A 00 6C 00 62 00 72 00 00 00 00 00  c.x.z.l.b.r.....  
+00A8BF2C  6B 00 6A 00 68 00 67 00 63 00 74 00 00 00 00 00  k.j.h.g.c.t.....  
+00A8BF3C  66 00 64 00 73 00 61 00 64 00 79 00 00 00 00 00  f.d.s.a.d.y.....  
+00A8BF4C  70 00 6F 00 69 00 75 00 65 00 75 00 00 00 00 00  p.o.i.u.e.u.....  
+00A8BF5C  79 00 74 00 72 00 65 00 66 00 6F 00 00 00 00 00  y.t.r.e.f.o.....  
+00A8BF6C  77 00 71 00 61 00 6C 00 67 00 78 00 00 00 00 00  w.q.a.l.g.x.....  
+00A8BF7C  6B 00 73 00 6A 00 64 00 68 00 76 00 00 00 00 00  k.s.j.d.h.v.....  
+00A8BF8C  68 00 66 00 67 00 62 00 69 00 66 00 00 00 00 00  h.f.g.b.i.f.....  
+00A8BF9C  71 00 61 00 7A 00 77 00 6A 00 61 00 00 00 00 00  q.a.z.w.j.a.....  
+00A8BFAC  73 00 78 00 65 00 64 00 6B 00 66 00 00 00 00 00  s.x.e.d.k.f.....  
+00A8BFBC  63 00 72 00 66 00 76 00 6C 00 67 00 00 00 00 00  c.r.f.v.l.g.....  
+00A8BFCC  74 00 67 00 62 00 79 00 6D 00 68 00 00 00 00 00  t.g.b.y.m.h.....  
+00A8BFDC  68 00 6E 00 75 00 6A 00 6E 00 69 00 00 00 00 00  h.n.u.j.n.i.....  
+00A8BFEC  6D 00 69 00 6B 00 6C 00 6F 00 70 00 00 00 00 00  m.i.k.l.o.p.....  
+00A8BFFC  70 00 6C 00 6F 00 6B 00 70 00 63 00 00 00 00 00  p.l.o.k.p.c.....  
+
+
+formula: ebp(addr in stack) + edx(rest from division/100/9) * 4(bytes) - 44(the first string)
+
+            Algo of the addres of generation string:
+1). 
+
+
+
+
+            Algo of generating letters (using 1Ah and 61h):
+1). take string
+2). take buffer
+3). movzx eax,letter of string
+4). movzx edx,letter of buffer
+5). lea eax,dword ptr ds:[reg1+reg2-C2]
+6). cdq
+7). idiv 1Ah
+8). add edx(rest from division), 61h
+9). mov byte ptr[buffer], dx
+
+next repeat inc buf and string addr by 1 and move new value to buffer+1
+
+9379992-ukolchik(jykuje is generated):
+
+j           -           u
+y           -           k
+k           -           0
+u           -           l
+65:'e'      -           c
+6E:'n'      -           h
+
+string ser-N for 9379992 - jykuen + any 2 leters (f.e. jykuenlp)
+
+later it goes
+cmp 00DC6DAC(lies somewhere in dump), 008F2098(9379992)   <- addr is AB98F0
+....
+inc esi(=1)
+mov eax,esi(eax=1)
+imul eax,eax,16
+lea ecx,[eax+AB98F0](00ABF18B)
+cmp [ecx](00ABF18B),0
+jne to beginning
+--------------------
+each step for last cmp ecx with 0 is 16h * 1/2/3/4...
+
+
+
+
+
+
+
+
+
+
+
+
+
